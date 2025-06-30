@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Real Time Device Tracking</title>
+    <link rel="icon" type="image/png" href="/favicon.ico" />
+    <meta name="theme-color" content="#66a6ff" />
+    <meta
+      name="description"
+      content="A modern real-time device tracking app with authentication."
+    />
     <link rel="stylesheet" href="/css/style.css" />
     <link
       rel="stylesheet"
@@ -12,26 +18,146 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
-      integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <!-- <script src="/socket.io/socket.io.js"></script> -->
   </head>
   <body>
-    <div id="map"></div>
+    <div id="auth-container">
+      <h2>Login</h2>
+      <form id="login-form">
+        <input
+          type="text"
+          id="login-username"
+          placeholder="Username"
+          required
+        />
+        <input
+          type="password"
+          id="login-password"
+          placeholder="Password"
+          required
+        />
+        <button type="submit">Login</button>
+      </form>
+      <h2>Register</h2>
+      <form id="register-form">
+        <input
+          type="text"
+          id="register-username"
+          placeholder="Username"
+          required
+        />
+        <input
+          type="password"
+          id="register-password"
+          placeholder="Password"
+          required
+        />
+        <button type="submit">Register</button>
+      </form>
+      <div id="auth-message"></div>
+    </div>
+    <div id="map" style="display: none"></div>
+    <button
+      id="logout-btn"
+      style="
+        display: none;
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 1000;
+        background: #fff;
+        color: #66a6ff;
+        border: none;
+        padding: 0.7rem 1.2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(31, 38, 135, 0.08);
+        cursor: pointer;
+      "
+    >
+      Logout
+    </button>
 
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
-      integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
     <script
       src="https://cdn.socket.io/4.8.1/socket.io.min.js"
-      integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+"
       crossorigin="anonymous"
     ></script>
-    <script src="/js/script.js"></script>
+    <script>
+      // Handle login
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const username = document.getElementById("login-username").value;
+          const password = document.getElementById("login-password").value;
+          const res = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await res.json();
+          if (data.token) {
+            localStorage.setItem("token", data.token);
+            document.getElementById("auth-container").style.display = "none";
+            document.getElementById("map").style.display = "block";
+            document.getElementById("logout-btn").style.display = "block";
+            loadMapScript();
+          } else {
+            document.getElementById("auth-message").innerText =
+              data.error || "Login failed";
+          }
+        });
+      // Handle register
+      document
+        .getElementById("register-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const username = document.getElementById("register-username").value;
+          const password = document.getElementById("register-password").value;
+          const res = await fetch("/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await res.json();
+          if (data.message && data.message.includes("successful")) {
+            document.getElementById("auth-message").innerText =
+              "Registration successful. Please login.";
+          } else {
+            document.getElementById("auth-message").innerText =
+              data.error || "Registration failed";
+          }
+        });
+      // Dynamically load the map script after authentication
+      function loadMapScript() {
+        const script = document.createElement("script");
+        script.src = "/js/script.js";
+        document.body.appendChild(script);
+      }
+      // Auto-login if token exists
+      window.onload = function () {
+        if (localStorage.getItem("token")) {
+          document.getElementById("auth-container").style.display = "none";
+          document.getElementById("map").style.display = "block";
+          document.getElementById("logout-btn").style.display = "block";
+          loadMapScript();
+        }
+      };
+      // Logout functionality
+      document.getElementById("logout-btn").onclick = function () {
+        localStorage.removeItem("token");
+        document.getElementById("map").style.display = "none";
+        document.getElementById("logout-btn").style.display = "none";
+        document.getElementById("auth-container").style.display = "block";
+        location.reload();
+      };
+    </script>
   </body>
 </html>
