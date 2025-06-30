@@ -7,7 +7,7 @@ const server = http.createServer(app);
 const io = socketio(server);
 const { authenticateSocket } = require("./middleware/jwt");
 const authRoutes = require("./routes/auth");
-const connectDB = require("../db/config");
+const connectDB = require("./DB/config");
 const PORT = process.env.PORT || 3000;
 
 connectDB();
