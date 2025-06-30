@@ -8,6 +8,7 @@ const io = socketio(server);
 const { authenticateSocket } = require("./middleware/jwt");
 const authRoutes = require("./routes/auth");
 const connectDB = require("./DB/config");
+const PORT = process.env.PORT || 3000;
 
 connectDB();
 
@@ -57,6 +58,6 @@ io.on("connection", (socket) => {
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
-server.listen(3000, () => {
-  console.log("Server is running on port 3000");
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
