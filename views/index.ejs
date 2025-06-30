@@ -21,7 +21,12 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"
+    />
   </head>
+
   <body>
     <div id="auth-container">
       <h2>Login</h2>
@@ -137,9 +142,16 @@
         });
       // Dynamically load the map script after authentication
       function loadMapScript() {
-        const script = document.createElement("script");
-        script.src = "/js/script.js";
-        document.body.appendChild(script);
+        const leafletRouteScript = document.createElement("script");
+        leafletRouteScript.src =
+          "https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js";
+        document.body.appendChild(leafletRouteScript);
+
+        leafletRouteScript.onload = () => {
+          const script = document.createElement("script");
+          script.src = "/js/script.js";
+          document.body.appendChild(script);
+        };
       }
       // Auto-login if token exists
       window.onload = function () {
