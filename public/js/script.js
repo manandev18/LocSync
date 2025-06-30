@@ -40,8 +40,7 @@ if (navigator.geolocation) {
 // Listen for location updates from other users/devices
 socket.on("locationupdate", (data) => {
   const { id, latitude, longitude, username } = data;
-  map.setView([latitude, longitude], 20);
-
+  // No automatic recentering here!
   if (markers[id]) {
     markers[id].setLatLng([latitude, longitude]);
     if (username) markers[id].bindPopup(username);
@@ -80,6 +79,18 @@ socket.on("locationupdate", (data) => {
     });
   }
 });
+
+// Recenter button logic
+const recenterBtn = document.getElementById("recenter-btn");
+if (recenterBtn) {
+  recenterBtn.onclick = function () {
+    if (myLatLng) {
+      map.setView(myLatLng, 16);
+    } else {
+      alert("Waiting for your location...");
+    }
+  };
+}
 
 // Remove marker when user disconnects
 socket.on("user-disconnected", (id) => {

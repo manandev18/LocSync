@@ -84,6 +84,26 @@
     >
       Logout
     </button>
+    <button
+      id="recenter-btn"
+      style="
+        display: none;
+        position: fixed;
+        top: 70px;
+        right: 24px;
+        z-index: 1000;
+        background: #fff;
+        color: #66a6ff;
+        border: none;
+        padding: 0.7rem 1.2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(31, 38, 135, 0.08);
+        cursor: pointer;
+      "
+    >
+      Recenter
+    </button>
 
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
@@ -113,6 +133,7 @@
             document.getElementById("auth-container").style.display = "none";
             document.getElementById("map").style.display = "block";
             document.getElementById("logout-btn").style.display = "block";
+            document.getElementById("recenter-btn").style.display = "block";
             loadMapScript();
           } else {
             document.getElementById("auth-message").innerText =
@@ -159,6 +180,7 @@
           document.getElementById("auth-container").style.display = "none";
           document.getElementById("map").style.display = "block";
           document.getElementById("logout-btn").style.display = "block";
+          document.getElementById("recenter-btn").style.display = "block";
           loadMapScript();
         }
       };
