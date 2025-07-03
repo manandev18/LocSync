@@ -45,18 +45,47 @@ if (navigator.geolocation) {
   );
 }
 
+// Toast notification for mobile/in-app fallback
+function showToast(message) {
+  let toast = document.getElementById("custom-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "custom-toast";
+    toast.style.position = "fixed";
+    toast.style.bottom = "40px";
+    toast.style.left = "50%";
+    toast.style.transform = "translateX(-50%)";
+    toast.style.background = "#333";
+    toast.style.color = "#fff";
+    toast.style.padding = "12px 24px";
+    toast.style.borderRadius = "8px";
+    toast.style.fontSize = "1rem";
+    toast.style.zIndex = 3000;
+    toast.style.boxShadow = "0 2px 8px rgba(31,38,135,0.18)";
+    toast.style.display = "none";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.display = "block";
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 4000);
+}
+
 socket.on("private-message", ({ from, fromUsername, message }) => {
   openChatBox(from, fromUsername || "User");
   const chatBox = document.getElementById("chatbox-" + from);
   appendMessage(chatBox, fromUsername || "User", message);
   if (!chatHistory[from]) chatHistory[from] = [];
   chatHistory[from].push({ sender: fromUsername || "User", message });
-  // Show browser notification or fallback alert for mobile
+  // Show browser notification or fallback toast/alert for mobile
   if (window.Notification && Notification.permission === "granted") {
     new Notification("New message", {
       body: `${fromUsername || "User"}: ${message}`,
       icon: "https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
     });
+  } else if (/Mobi|Android/i.test(navigator.userAgent)) {
+    showToast(`New message from ${fromUsername || "User"}: ${message}`);
   } else {
     alert(`New message from ${fromUsername || "User"}: ${message}`);
   }
@@ -153,12 +182,16 @@ if (window.Notification && Notification.permission !== "granted") {
 }
 
 socket.on("alert-notification", (data) => {
-  // Show browser notification or fallback alert for mobile
+  // Show browser notification or fallback toast/alert for mobile
   if (window.Notification && Notification.permission === "granted") {
     new Notification("🚨 Help needed near you!", {
       body: `User ${data.username} needs help at (${data.latitude}, ${data.longitude})`,
       icon: "https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
     });
+  } else if (/Mobi|Android/i.test(navigator.userAgent)) {
+    showToast(
+      `🚨 Help needed near you! User ${data.username} at (${data.latitude}, ${data.longitude})`
+    );
   } else {
     alert(
       `🚨 Help needed near you! User ${data.username} at (${data.latitude}, ${data.longitude})`
