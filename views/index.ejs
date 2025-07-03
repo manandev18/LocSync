@@ -85,26 +85,6 @@
       Logout
     </button>
     <button
-      id="alert-btn"
-      style="
-        display: none;
-        position: fixed;
-        top: 120px;
-        right: 24px;
-        z-index: 1000;
-        background: #fff;
-        color: #e74c3c;
-        border: none;
-        padding: 0.7rem 1.2rem;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(31, 38, 135, 0.08);
-        cursor: pointer;
-      "
-    >
-      Send Alert
-    </button>
-    <button
       id="recenter-btn"
       style="
         display: none;
@@ -123,6 +103,26 @@
       "
     >
       Recenter
+    </button>
+    <button
+      id="alert-btn"
+      style="
+        display: none;
+        position: fixed;
+        top: 120px;
+        right: 24px;
+        z-index: 1000;
+        background: #fff;
+        color: #e74c3c;
+        border: none;
+        padding: 0.7rem 1.2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(31, 38, 135, 0.08);
+        cursor: pointer;
+      "
+    >
+      Send Alert
     </button>
 
     <script
@@ -150,7 +150,6 @@
           const data = await res.json();
           if (data.token) {
             localStorage.setItem("token", data.token);
-            localStorage.setItem("username", username); // Store username
             document.getElementById("auth-container").style.display = "none";
             document.getElementById("map").style.display = "block";
             document.getElementById("logout-btn").style.display = "block";

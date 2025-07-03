@@ -47,37 +47,33 @@ io.on("connection", (socket) => {
       username: socket.username,
     });
   });
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-    delete clientLocations[socket.id];
-    delete clientUsernames[socket.id];
-    io.emit("user-disconnected", socket.id);
-  });
-
   socket.on("sendalert", (data) => {
     console.log("Alert received:", data);
-    const { latitude, longitude } = data;
-    const RADIUS = 1000; // 1 km radius
+    const { latitude, longitude, username } = data;
+    const RADIUS = 100000; // 1 km radius
     for (const [id, loc] of Object.entries(clientLocations)) {
       if (
         id !== socket.id &&
         isWithinRadius(latitude, longitude, loc.latitude, loc.longitude, RADIUS)
       ) {
         io.to(id).emit("alert-notification", {
-          ...data,
-          username: socket.username,
+          latitude,
+          longitude,
+          username,
         });
       }
     }
+  });
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+    delete clientLocations[socket.id];
+    delete clientUsernames[socket.id];
+    io.emit("user-disconnected", socket.id);
   });
 });
 
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
-
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
 
 // Haversine formula to check distance in meters
 function isWithinRadius(lat1, lon1, lat2, lon2, radius) {
@@ -96,3 +92,7 @@ function isWithinRadius(lat1, lon1, lat2, lon2, radius) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c <= radius;
 }
+
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

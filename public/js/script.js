@@ -17,6 +17,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 const markers = {};
 let myLatLng = null; // Store your location
 let routeControl = null; // Store routing control instance
+let firstCenter = false;
 
 // Track your own location and send to server
 if (navigator.geolocation) {
@@ -25,6 +26,12 @@ if (navigator.geolocation) {
       const { latitude, longitude } = position.coords;
       myLatLng = [latitude, longitude];
       socket.emit("sendlocation", { latitude, longitude });
+      if (!firstCenter) {
+        document.getElementById("map").style.display = "block";
+        map.setView(myLatLng, 16);
+        map.invalidateSize();
+        firstCenter = true;
+      }
     },
     (error) => {
       console.error("Error getting location:", error);
@@ -40,7 +47,6 @@ if (navigator.geolocation) {
 // Listen for location updates from other users/devices
 socket.on("locationupdate", (data) => {
   const { id, latitude, longitude, username } = data;
-
   // No automatic recentering here!
   if (markers[id]) {
     markers[id].setLatLng([latitude, longitude]);
@@ -49,7 +55,6 @@ socket.on("locationupdate", (data) => {
     // New marker
     markers[id] = L.marker([latitude, longitude]).addTo(map);
     if (username) markers[id].bindPopup(username).openPopup();
-    map.setView([latitude, longitude], 16);
 
     // Add click event to draw route from you to the marker
     markers[id].on("click", () => {
@@ -93,6 +98,61 @@ if (recenterBtn) {
     }
   };
 }
+
+// Remove marker when user disconnects
+socket.on("user-disconnected", (id) => {
+  console.log("Client disconnected:", id);
+  if (markers[id]) {
+    map.removeLayer(markers[id]);
+    delete markers[id];
+  }
+});
+// ✅ Clear route when clicking anywhere else on the map
+map.on("click", () => {
+  if (routeControl) {
+    map.removeControl(routeControl);
+    routeControl = null;
+  }
+});
+
+// Request notification permission on load
+if (window.Notification && Notification.permission !== "granted") {
+  Notification.requestPermission();
+}
+
+socket.on("alert-notification", (data) => {
+  // Show browser notification
+  if (window.Notification && Notification.permission === "granted") {
+    new Notification("🚨 Help needed near you!", {
+      body: `User ${data.username} needs help at (${data.latitude}, ${data.longitude})`,
+      icon: "https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
+    });
+  }
+  // Highlight the alert sender's marker (by coordinates or username)
+  for (const id in markers) {
+    const marker = markers[id];
+    const markerLatLng = marker.getLatLng();
+    // If you have user ID, you can match by id === data.id
+    if (
+      (data.id && id === data.id) ||
+      (Math.abs(markerLatLng.lat - data.latitude) < 0.0001 &&
+        Math.abs(markerLatLng.lng - data.longitude) < 0.0001)
+    ) {
+      const originalIcon = marker.options.icon;
+      const redIcon = new L.Icon({
+        iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
+      });
+      marker.setIcon(redIcon);
+      setTimeout(() => {
+        if (originalIcon) marker.setIcon(originalIcon);
+      }, 10000);
+    }
+  }
+});
+
 const alertBtn = document.getElementById("alert-btn");
 if (alertBtn) {
   alertBtn.onclick = function () {
@@ -114,59 +174,5 @@ if (alertBtn) {
     }
   };
 }
-
-// Request notification permission on load
-if (window.Notification && Notification.permission !== "granted") {
-  Notification.requestPermission();
-}
-
-socket.on("alert-notification", (data) => {
-  // Use Notification API if available
-  if (window.Notification && Notification.permission === "granted") {
-    new Notification("🚨 Help needed near you!", {
-      body: `User ${data.username} needs help at (${data.latitude}, ${data.longitude})`,
-      icon: "https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
-    });
-  }
-  // Highlight the alert sender's marker
-  for (const id in markers) {
-    const marker = markers[id];
-    const markerLatLng = marker.getLatLng();
-    // Check by coordinates (rounded for floating point safety)
-    if (
-      Math.abs(markerLatLng.lat - data.latitude) < 0.0001 &&
-      Math.abs(markerLatLng.lng - data.longitude) < 0.0001
-    ) {
-      // Change icon to red for 5 seconds
-      const originalIcon = marker.options.icon;
-      const redIcon = new L.Icon({
-        iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32],
-      });
-      marker.setIcon(redIcon);
-      marker.openPopup();
-      setTimeout(() => {
-        if (originalIcon) marker.setIcon(originalIcon);
-      }, 10000);
-    }
-  }
-});
-// Remove marker when user disconnects
-socket.on("user-disconnected", (id) => {
-  console.log("Client disconnected:", id);
-  if (markers[id]) {
-    map.removeLayer(markers[id]);
-    delete markers[id];
-  }
-});
-// ✅ Clear route when clicking anywhere else on the map
-map.on("click", () => {
-  if (routeControl) {
-    map.removeControl(routeControl);
-    routeControl = null;
-  }
-});
 
 console.log("Client script loaded");
