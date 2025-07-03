@@ -51,12 +51,14 @@ socket.on("private-message", ({ from, fromUsername, message }) => {
   appendMessage(chatBox, fromUsername || "User", message);
   if (!chatHistory[from]) chatHistory[from] = [];
   chatHistory[from].push({ sender: fromUsername || "User", message });
-  // Show browser notification
+  // Show browser notification or fallback alert for mobile
   if (window.Notification && Notification.permission === "granted") {
     new Notification("New message", {
       body: `${fromUsername || "User"}: ${message}`,
       icon: "https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
     });
+  } else {
+    alert(`New message from ${fromUsername || "User"}: ${message}`);
   }
 });
 
