@@ -151,12 +151,16 @@ if (window.Notification && Notification.permission !== "granted") {
 }
 
 socket.on("alert-notification", (data) => {
-  // Show browser notification
+  // Show browser notification or fallback alert for mobile
   if (window.Notification && Notification.permission === "granted") {
     new Notification("🚨 Help needed near you!", {
       body: `User ${data.username} needs help at (${data.latitude}, ${data.longitude})`,
       icon: "https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
     });
+  } else {
+    alert(
+      `🚨 Help needed near you! User ${data.username} at (${data.latitude}, ${data.longitude})`
+    );
   }
   // Highlight the alert sender's marker (by coordinates or username)
   for (const id in markers) {
