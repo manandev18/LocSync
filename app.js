@@ -70,6 +70,14 @@ io.on("connection", (socket) => {
     delete clientUsernames[socket.id];
     io.emit("user-disconnected", socket.id);
   });
+
+  socket.on("private-message", ({ to, message, fromUsername }) => {
+    io.to(to).emit("private-message", {
+      from: socket.id,
+      fromUsername,
+      message,
+    });
+  });
 });
 
 app.set("view engine", "ejs");

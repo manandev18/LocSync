@@ -18,6 +18,7 @@ const markers = {};
 let myLatLng = null; // Store your location
 let routeControl = null; // Store routing control instance
 let firstCenter = false;
+let chatHistory = {}; // Store chat history
 
 // Track your own location and send to server
 if (navigator.geolocation) {
@@ -44,32 +45,55 @@ if (navigator.geolocation) {
   );
 }
 
+socket.on("private-message", ({ from, fromUsername, message }) => {
+  openChatBox(from, fromUsername || "User");
+  const chatBox = document.getElementById("chatbox-" + from);
+  appendMessage(chatBox, fromUsername || "User", message);
+  if (!chatHistory[from]) chatHistory[from] = [];
+  chatHistory[from].push({ sender: fromUsername || "User", message });
+  // Show browser notification
+  if (window.Notification && Notification.permission === "granted") {
+    new Notification("New message", {
+      body: `${fromUsername || "User"}: ${message}`,
+      icon: "https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
+    });
+  }
+});
+
 // Listen for location updates from other users/devices
 socket.on("locationupdate", (data) => {
   const { id, latitude, longitude, username } = data;
   // No automatic recentering here!
+  const isMe = id === socket.id;
+  const myIcon = new L.Icon({
+    iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
   if (markers[id]) {
     markers[id].setLatLng([latitude, longitude]);
+    if (isMe) markers[id].setIcon(myIcon);
     if (username) markers[id].bindPopup(username);
   } else {
     // New marker
-    markers[id] = L.marker([latitude, longitude]).addTo(map);
-    if (username) markers[id].bindPopup(username).openPopup();
-
+    const marker = L.marker(
+      [latitude, longitude],
+      isMe ? { icon: myIcon } : undefined
+    ).addTo(map);
+    markers[id] = marker;
+    if (username) marker.bindPopup(username).openPopup();
     // Add click event to draw route from you to the marker
-    markers[id].on("click", () => {
+    marker.on("click", () => {
       if (!myLatLng) {
         alert("Waiting for your location...");
         return;
       }
-
       const targetLatLng = [latitude, longitude];
-
       // Remove existing route
       if (routeControl) {
         map.removeControl(routeControl);
       }
-
       // Draw route using Leaflet Routing Machine
       routeControl = L.Routing.control({
         waypoints: [
@@ -83,6 +107,8 @@ socket.on("locationupdate", (data) => {
         addWaypoints: false,
         draggableWaypoints: false,
       }).addTo(map);
+      // Open chat box on marker click
+      openChatBox(id, username);
     });
   }
 });
@@ -107,11 +133,15 @@ socket.on("user-disconnected", (id) => {
     delete markers[id];
   }
 });
-// ✅ Clear route when clicking anywhere else on the map
-map.on("click", () => {
+// ✅ Clear route and close all chatboxes when clicking anywhere else on the map
+map.on("click", (e) => {
   if (routeControl) {
     map.removeControl(routeControl);
     routeControl = null;
+  }
+  // Only close chatboxes if the click is not on a marker
+  if (!e.originalEvent.target.classList.contains("leaflet-marker-icon")) {
+    clearAllChats();
   }
 });
 
@@ -153,6 +183,55 @@ socket.on("alert-notification", (data) => {
   }
 });
 
+function openChatBox(userId, username) {
+  let chatbox = document.getElementById("chatbox-" + userId);
+  if (!chatbox) {
+    chatbox = document.createElement("div");
+    chatbox.id = "chatbox-" + userId;
+    chatbox.className = "chatbox";
+    chatbox.innerHTML = `
+     <div class="chat-header">Chat with ${username} <span class="close-chat" style="cursor:pointer;float:right;">&times;</span></div>
+      <div class="chat-messages" style="height:120px;overflow-y:auto;"></div>
+      <input type="text" class="chat-input" placeholder="Type a message..." style="width:80%;">
+      <button class="send-chat-btn">Send</button>
+   `;
+    document.body.appendChild(chatbox);
+
+    chatbox.querySelector(".close-chat").onclick = () => chatbox.remove();
+    chatbox.querySelector(".send-chat-btn").onclick = () => {
+      const input = chatbox.querySelector(".chat-input");
+      const message = input.value.trim();
+      if (message) {
+        socket.emit("private-message", {
+          to: userId,
+          message: message,
+          fromUsername: localStorage.getItem("username") || "Unknown",
+        });
+        appendMessage(chatbox, "You", message);
+        if (!chatHistory[userId]) chatHistory[userId] = [];
+        chatHistory[userId].push({ sender: "You", message });
+        input.value = "";
+      }
+    };
+    chatbox.style.display = "block";
+  }
+  // Render chat history
+  const messagesDiv = chatbox.querySelector(".chat-messages");
+  messagesDiv.innerHTML = "";
+  if (chatHistory[userId]) {
+    chatHistory[userId].forEach(({ sender, message }) => {
+      appendMessage(chatbox, sender, message);
+    });
+  }
+}
+
+function appendMessage(chatBox, sender, message) {
+  const msgDiv = document.createElement("div");
+  msgDiv.textContent = `${sender}: ${message}`;
+  chatBox.querySelector(".chat-messages").appendChild(msgDiv);
+  chatBox.querySelector(".chat-messages").scrollTop =
+    chatBox.querySelector(".chat-messages").scrollHeight;
+}
 const alertBtn = document.getElementById("alert-btn");
 if (alertBtn) {
   alertBtn.onclick = function () {
@@ -174,5 +253,19 @@ if (alertBtn) {
     }
   };
 }
+
+// Clear all chat boxes on logout
+function clearAllChats() {
+  document.querySelectorAll(".chatbox").forEach((box) => box.remove());
+}
+
+document.getElementById("logout-btn").onclick = function () {
+  localStorage.removeItem("token");
+  document.getElementById("map").style.display = "none";
+  document.getElementById("logout-btn").style.display = "none";
+  document.getElementById("auth-container").style.display = "block";
+  clearAllChats();
+  location.reload();
+};
 
 console.log("Client script loaded");
