@@ -53,6 +53,23 @@ io.on("connection", (socket) => {
     delete clientUsernames[socket.id];
     io.emit("user-disconnected", socket.id);
   });
+
+  socket.on("sendalert", (data) => {
+    console.log("Alert received:", data);
+    const { latitude, longitude } = data;
+    const RADIUS = 1000; // 1 km radius
+    for (const [id, loc] of Object.entries(clientLocations)) {
+      if (
+        id !== socket.id &&
+        isWithinRadius(latitude, longitude, loc.latitude, loc.longitude, RADIUS)
+      ) {
+        io.to(id).emit("alert-notification", {
+          ...data,
+          username: socket.username,
+        });
+      }
+    }
+  });
 });
 
 app.set("view engine", "ejs");
@@ -61,3 +78,21 @@ app.use(express.static(path.join(__dirname, "public")));
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// Haversine formula to check distance in meters
+function isWithinRadius(lat1, lon1, lat2, lon2, radius) {
+  function toRad(x) {
+    return (x * Math.PI) / 180;
+  }
+  const R = 6371000; // Earth radius in meters
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c <= radius;
+}
