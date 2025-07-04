@@ -206,11 +206,11 @@ body::before {
   z-index: 1;
 }
 
-/* Control Buttons */
+/* Control Buttons - REDUCED Z-INDEX */
 .control-btn {
   position: fixed;
   right: 24px;
-  z-index: 1000;
+  z-index: 500; /* Reduced from 1000 to 500 */
   background: var(--bg-glass);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border-color);
@@ -440,15 +440,17 @@ body::before {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Leaflet Routing Machine Styles - FIX FOR DIRECTIONS TEXT */
+/* Leaflet Routing Machine Styles - HIGH Z-INDEX FOR DIRECTIONS */
 .leaflet-routing-container {
   background: var(--bg-glass) !important;
   backdrop-filter: blur(20px) !important;
   border: 1px solid var(--border-color) !important;
   border-radius: var(--border-radius-sm) !important;
-  box-shadow: var(--shadow-light) !important;
+  box-shadow: var(--shadow-heavy) !important;
   color: var(--text-primary) !important;
   font-family: 'Inter', sans-serif !important;
+  z-index: 1500 !important; /* Higher than control buttons (500) */
+  position: relative !important;
 }
 
 .leaflet-routing-container h2 {
