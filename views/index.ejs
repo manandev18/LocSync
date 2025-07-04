@@ -25,6 +25,19 @@
       rel="stylesheet"
       href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"
     />
+    <link rel="manifest" href="/manifest.json" />
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("/service-worker.js")
+          .then(function (reg) {
+            console.log("Service Worker registered!", reg);
+          })
+          .catch(function (err) {
+            console.error("Service Worker registration failed:", err);
+          });
+      }
+    </script>
   </head>
 
   <body>

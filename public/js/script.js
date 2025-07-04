@@ -1,4 +1,52 @@
 // Get token from localStorage and connect to socket.io with auth
+// Register service worker and subscribe to push
+if ("serviceWorker" in navigator && "PushManager" in window) {
+  navigator.serviceWorker
+    .register("/service-worker.js")
+    .then(function (reg) {
+      console.log("Service Worker registered!", reg);
+
+      // Ask for push permission and subscribe
+      reg.pushManager.getSubscription().then(function (sub) {
+        if (!sub) {
+          // Replace with your VAPID public key (Base64 URL-encoded)
+          const vapidPublicKey =
+            "BIPOUTR2ynVYnzBymAuw6ooLXYENn_uIyCSjAQQw39ajahEK2KhPGxJ1r8EvRA-hmbndtUjuwYbgYutRvl4PWMY";
+          const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+          reg.pushManager
+            .subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: convertedVapidKey,
+            })
+            .then(function (subscription) {
+              // Send subscription to server
+              fetch("/subscribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(subscription),
+              });
+            });
+        }
+      });
+    })
+    .catch(function (err) {
+      console.error("Service Worker registration failed:", err);
+    });
+}
+
+// Helper to convert VAPID key
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, "+")
+    .replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
 const token = localStorage.getItem("token");
 const socket = io({
   auth: { token },

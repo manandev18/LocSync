@@ -1,0 +1,16 @@
+{
+  "name": "Realtime Device Track",
+  "short_name": "DeviceTrack",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#66a6ff",
+  "theme_color": "#66a6ff",
+  "description": "A real-time device tracking app.",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

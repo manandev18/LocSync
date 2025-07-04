@@ -100,7 +100,36 @@ function isWithinRadius(lat1, lon1, lat2, lon2, radius) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c <= radius;
 }
+const webpush = require("web-push");
+const subscriptions = []; // In production, store in DB
 
+webpush.setVapidDetails(
+  "mailto:your@email.com",
+  "BIPOUTR2ynVYnzBymAuw6ooLXYENn_uIyCSjAQQw39ajahEK2KhPGxJ1r8EvRA-hmbndtUjuwYbgYutRvl4PWMY",
+  "lfGEG4-zdBzBpWB8D_CSwB5z0gf6Cp9OJW2oGKc872s"
+);
+
+app.post("/subscribe", express.json(), (req, res) => {
+  const subscription = req.body;
+  subscriptions.push(subscription);
+  res.status(201).json({});
+});
+
+// Example: Send push to all subscribers (call this when you want to notify)
+function sendPushToAll(title, body) {
+  subscriptions.forEach((sub) => {
+    webpush
+      .sendNotification(
+        sub,
+        JSON.stringify({
+          title,
+          body,
+          icon: "https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
+        })
+      )
+      .catch((err) => console.error(err));
+  });
+}
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
