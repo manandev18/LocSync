@@ -370,20 +370,21 @@ body::before {
   padding: 0.75rem 1rem;
   margin: 1rem;
   margin-right: 0.5rem;
-  color: var(--text-primary);
+  color: var(--text-primary) !important; /* FIXED: Force white text */
   font-size: 0.9rem;
   width: calc(70% - 1rem);
   transition: var(--transition);
 }
 
 .chat-input::placeholder {
-  color: var(--text-muted);
+  color: var(--text-muted) !important; /* FIXED: Ensure placeholder is visible */
 }
 
 .chat-input:focus {
   outline: none;
   border-color: #667eea;
   background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary) !important; /* FIXED: Maintain white text on focus */
 }
 
 .send-chat-btn {
@@ -473,7 +474,7 @@ body::before {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Leaflet Routing Machine Styles - REPOSITIONED TO LEFT SIDE */
+/* Leaflet Routing Machine Styles - REPOSITIONED AND ENHANCED */
 .leaflet-routing-container {
   background: var(--bg-glass) !important;
   backdrop-filter: blur(20px) !important;
@@ -483,16 +484,19 @@ body::before {
   color: var(--text-primary) !important;
   font-family: "Inter", sans-serif !important;
   
-  /* REPOSITIONED TO LEFT SIDE */
+  /* REPOSITIONED TO LEFT SIDE WITH PROPER VISIBILITY */
   position: fixed !important;
   top: 24px !important;
   left: 24px !important;
   right: auto !important;
   bottom: auto !important;
-  z-index: 1500 !important;
-  max-width: 350px !important;
+  z-index: 1500 !important; /* Higher than control buttons */
+  max-width: 380px !important;
   max-height: calc(100vh - 48px) !important;
   overflow-y: auto !important;
+  
+  /* Enhanced visibility */
+  opacity: 0.98 !important;
   
   /* Smooth animation */
   animation: slideInLeft 0.3s ease-out !important;
@@ -504,7 +508,7 @@ body::before {
     transform: translateX(-20px);
   }
   to {
-    opacity: 1;
+    opacity: 0.98;
     transform: translateX(0);
   }
 }
@@ -520,6 +524,7 @@ body::before {
   position: sticky !important;
   top: 0 !important;
   z-index: 10 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
 .leaflet-routing-container h3 {
@@ -563,6 +568,7 @@ body::before {
   border-bottom: 1px solid var(--border-color) !important;
   padding: 0.5rem 1rem !important;
   font-size: 0.85rem !important;
+  line-height: 1.4 !important;
 }
 
 .leaflet-routing-instruction:hover {
@@ -576,6 +582,7 @@ body::before {
 
 .leaflet-routing-instruction-text {
   color: var(--text-primary) !important;
+  font-weight: 400 !important;
 }
 
 .leaflet-routing-collapse-btn {
