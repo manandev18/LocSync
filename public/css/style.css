@@ -440,7 +440,7 @@ body::before {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Leaflet Routing Machine Styles - HIGH Z-INDEX FOR DIRECTIONS */
+/* Leaflet Routing Machine Styles - REPOSITIONED TO LEFT SIDE */
 .leaflet-routing-container {
   background: var(--bg-glass) !important;
   backdrop-filter: blur(20px) !important;
@@ -449,8 +449,31 @@ body::before {
   box-shadow: var(--shadow-heavy) !important;
   color: var(--text-primary) !important;
   font-family: 'Inter', sans-serif !important;
-  z-index: 1500 !important; /* Higher than control buttons (500) */
-  position: relative !important;
+  
+  /* REPOSITIONED TO LEFT SIDE */
+  position: fixed !important;
+  top: 24px !important;
+  left: 24px !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 1500 !important;
+  max-width: 350px !important;
+  max-height: calc(100vh - 48px) !important;
+  overflow-y: auto !important;
+  
+  /* Smooth animation */
+  animation: slideInLeft 0.3s ease-out !important;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .leaflet-routing-container h2 {
@@ -461,6 +484,9 @@ body::before {
   border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0 !important;
   font-size: 0.9rem !important;
   font-weight: 600 !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
 }
 
 .leaflet-routing-container h3 {
@@ -471,6 +497,9 @@ body::before {
   font-size: 0.8rem !important;
   font-weight: 500 !important;
   border-bottom: 1px solid var(--border-color) !important;
+  position: sticky !important;
+  top: 48px !important;
+  z-index: 9 !important;
 }
 
 .leaflet-routing-alternatives-container {
@@ -582,6 +611,24 @@ body::before {
   cursor: pointer !important;
 }
 
+/* Custom scrollbar for routing container */
+.leaflet-routing-container::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.leaflet-routing-container::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.leaflet-routing-container::-webkit-scrollbar-thumb {
+  background: var(--border-color) !important;
+  border-radius: 3px !important;
+}
+
+.leaflet-routing-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   #auth-container {
@@ -617,7 +664,10 @@ body::before {
   
   /* Mobile routing container adjustments */
   .leaflet-routing-container {
-    max-width: calc(100vw - 32px) !important;
+    left: 16px !important;
+    top: 16px !important;
+    max-width: calc(100vw - 140px) !important;
+    max-height: calc(100vh - 32px) !important;
     font-size: 0.8rem !important;
   }
   
@@ -643,7 +693,10 @@ body::before {
   }
   
   .leaflet-routing-container {
-    max-width: calc(100vw - 16px) !important;
+    left: 8px !important;
+    top: 8px !important;
+    max-width: calc(100vw - 100px) !important;
+    max-height: calc(100vh - 16px) !important;
   }
 }
 
