@@ -415,6 +415,171 @@ body::before {
   to { transform: rotate(360deg); }
 }
 
+/* Custom Leaflet Styles */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  color: var(--text-primary);
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color);
+}
+
+.leaflet-control-zoom a {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.leaflet-control-zoom a:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Leaflet Routing Machine Styles - FIX FOR DIRECTIONS TEXT */
+.leaflet-routing-container {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--border-radius-sm) !important;
+  box-shadow: var(--shadow-light) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.leaflet-routing-container h2 {
+  background: var(--primary-gradient) !important;
+  color: var(--text-primary) !important;
+  margin: 0 !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0 !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+}
+
+.leaflet-routing-container h3 {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  margin: 0 !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.leaflet-routing-alternatives-container {
+  background: var(--bg-secondary) !important;
+  border: none !important;
+}
+
+.leaflet-routing-alt {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--border-radius-sm) !important;
+  margin: 0.5rem !important;
+  color: var(--text-primary) !important;
+}
+
+.leaflet-routing-alt:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.leaflet-routing-alt-minimized {
+  background: var(--bg-glass) !important;
+  color: var(--text-primary) !important;
+}
+
+.leaflet-routing-instruction {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.85rem !important;
+}
+
+.leaflet-routing-instruction:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.leaflet-routing-instruction-distance {
+  color: var(--text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+.leaflet-routing-instruction-text {
+  color: var(--text-primary) !important;
+}
+
+.leaflet-routing-collapse-btn {
+  background: var(--bg-glass) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.8rem !important;
+  cursor: pointer !important;
+  transition: var(--transition) !important;
+}
+
+.leaflet-routing-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: scale(1.1) !important;
+}
+
+.leaflet-routing-geocoders {
+  background: var(--bg-secondary) !important;
+  border: none !important;
+  padding: 0.75rem !important;
+}
+
+.leaflet-routing-geocoder {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--border-radius-sm) !important;
+  color: var(--text-primary) !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.leaflet-routing-geocoder input {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  border: none !important;
+  padding: 0.5rem !important;
+}
+
+.leaflet-routing-geocoder input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* Fix for routing control buttons */
+.leaflet-routing-add-waypoint {
+  background: var(--success-gradient) !important;
+  border: none !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--border-radius-sm) !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  cursor: pointer !important;
+}
+
+.leaflet-routing-remove-waypoint {
+  background: var(--danger-gradient) !important;
+  border: none !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--border-radius-sm) !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  cursor: pointer !important;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   #auth-container {
@@ -447,6 +612,17 @@ body::before {
   .send-chat-btn {
     width: calc(35% - 1rem);
   }
+  
+  /* Mobile routing container adjustments */
+  .leaflet-routing-container {
+    max-width: calc(100vw - 32px) !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .leaflet-routing-instruction {
+    padding: 0.4rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -463,31 +639,10 @@ body::before {
     font-size: 0.8rem;
     min-width: 90px;
   }
-}
-
-/* Custom Leaflet Styles */
-.leaflet-popup-content-wrapper {
-  background: var(--bg-glass);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-sm);
-  color: var(--text-primary);
-}
-
-.leaflet-popup-tip {
-  background: var(--bg-glass);
-  border: 1px solid var(--border-color);
-}
-
-.leaflet-control-zoom a {
-  background: var(--bg-glass);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-}
-
-.leaflet-control-zoom a:hover {
-  background: rgba(255, 255, 255, 0.1);
+  
+  .leaflet-routing-container {
+    max-width: calc(100vw - 16px) !important;
+  }
 }
 
 /* Smooth Transitions */
