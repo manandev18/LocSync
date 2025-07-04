@@ -58,66 +58,15 @@ function showMap() {
 }
 
 const map = L.map("map").setView([0, 0], 10);
-
-// ===== BEAUTIFUL DARK MAP TILES =====
-// Using CartoDB Dark Matter theme for a stunning dark map
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  subdomains: 'abcd',
-  maxZoom: 20
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "Open StreetMap",
 }).addTo(map);
-
-// Alternative beautiful dark themes (uncomment to try):
-// 1. Stamen Toner (High contrast black & white)
-// L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.png', {
-//   attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-//   subdomains: 'abcd',
-//   maxZoom: 20
-// }).addTo(map);
-
-// 2. Esri World Imagery (Satellite view)
-// L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-//   attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-// }).addTo(map);
 
 const markers = {};
 let myLatLng = null; // Store your location
 let routeControl = null; // Store routing control instance
 let firstCenter = false;
 let chatHistory = {}; // Store chat history
-
-// ===== CUSTOM BEAUTIFUL MARKER ICONS =====
-const createCustomIcon = (color, isMe = false) => {
-  const size = isMe ? [40, 40] : [32, 32];
-  const anchor = isMe ? [20, 40] : [16, 32];
-  
-  return new L.Icon({
-    iconUrl: `data:image/svg+xml;base64,${btoa(`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size[0]}" height="${size[1]}">
-        <defs>
-          <linearGradient id="grad${color}" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:${color === 'me' ? '#4facfe' : color === 'user' ? '#667eea' : '#fa709a'};stop-opacity:1" />
-            <stop offset="100%" style="stop-color:${color === 'me' ? '#00f2fe' : color === 'user' ? '#764ba2' : '#fee140'};stop-opacity:1" />
-          </linearGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-            <feMerge> 
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        <circle cx="12" cy="12" r="8" fill="url(#grad${color})" filter="url(#glow)" stroke="white" stroke-width="2"/>
-        <circle cx="12" cy="12" r="3" fill="white" opacity="0.9"/>
-        ${isMe ? '<circle cx="12" cy="12" r="1.5" fill="#4facfe"/>' : ''}
-      </svg>
-    `)}`,
-    iconSize: size,
-    iconAnchor: anchor,
-    popupAnchor: [0, -anchor[1]],
-    className: 'custom-marker-icon'
-  });
-};
 
 // Track your own location and send to server
 if (navigator.geolocation) {
@@ -193,46 +142,26 @@ socket.on("private-message", ({ from, fromUsername, message }) => {
 // Listen for location updates from other users/devices
 socket.on("locationupdate", (data) => {
   const { id, latitude, longitude, username } = data;
+  // No automatic recentering here!
   const isMe = id === socket.id;
-  
-  // Use custom beautiful icons
-  const customIcon = createCustomIcon(isMe ? 'me' : 'user', isMe);
-  
+  const myIcon = new L.Icon({
+    iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
   if (markers[id]) {
     markers[id].setLatLng([latitude, longitude]);
-    markers[id].setIcon(customIcon);
-    if (username) {
-      markers[id].bindPopup(`
-        <div style="text-align: center; padding: 0.5rem;">
-          <div style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #667eea;">
-            ${isMe ? '📍 You' : '👤 ' + username}
-          </div>
-          <div style="font-size: 0.8rem; color: #b8b8d1; margin-bottom: 0.5rem;">
-            ${latitude.toFixed(6)}, ${longitude.toFixed(6)}
-          </div>
-          ${!isMe ? '<div style="font-size: 0.75rem; color: #8b8ba7;">Click to get directions</div>' : ''}
-        </div>
-      `);
-    }
+    if (isMe) markers[id].setIcon(myIcon);
+    if (username) markers[id].bindPopup(username);
   } else {
-    // New marker with custom icon
-    const marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(map);
+    // New marker
+    const marker = L.marker(
+      [latitude, longitude],
+      isMe ? { icon: myIcon } : undefined
+    ).addTo(map);
     markers[id] = marker;
-    
-    if (username) {
-      marker.bindPopup(`
-        <div style="text-align: center; padding: 0.5rem;">
-          <div style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #667eea;">
-            ${isMe ? '📍 You' : '👤 ' + username}
-          </div>
-          <div style="font-size: 0.8rem; color: #b8b8d1; margin-bottom: 0.5rem;">
-            ${latitude.toFixed(6)}, ${longitude.toFixed(6)}
-          </div>
-          ${!isMe ? '<div style="font-size: 0.75rem; color: #8b8ba7;">Click to get directions</div>' : ''}
-        </div>
-      `).openPopup();
-    }
-    
+    if (username) marker.bindPopup(username).openPopup();
     // Add click event to draw route from you to the marker
     marker.on("click", () => {
       if (!myLatLng) {
@@ -244,32 +173,21 @@ socket.on("locationupdate", (data) => {
       if (routeControl) {
         map.removeControl(routeControl);
       }
-      // Draw route using Leaflet Routing Machine with custom styling
+      // Draw route using Leaflet Routing Machine
       routeControl = L.Routing.control({
         waypoints: [
           L.latLng(myLatLng[0], myLatLng[1]),
           L.latLng(targetLatLng[0], targetLatLng[1]),
         ],
         lineOptions: {
-          styles: [{ 
-            color: "#667eea", 
-            opacity: 0.8, 
-            weight: 5,
-            dashArray: "10, 5"
-          }],
+          styles: [{ color: "blue", opacity: 0.7, weight: 6 }],
         },
         createMarker: () => null,
         addWaypoints: false,
         draggableWaypoints: false,
-        routeWhileDragging: false,
-        show: true,
-        collapsible: true
       }).addTo(map);
-      
       // Open chat box on marker click
-      if (!isMe) {
-        openChatBox(id, username);
-      }
+      openChatBox(id, username);
     });
   }
 });
@@ -280,11 +198,6 @@ if (recenterBtn) {
   recenterBtn.onclick = function () {
     if (myLatLng) {
       map.setView(myLatLng, 16);
-      // Add a subtle zoom animation
-      map.flyTo(myLatLng, 16, {
-        animate: true,
-        duration: 1.5
-      });
     } else {
       alert("Waiting for your location...");
     }
@@ -299,7 +212,6 @@ socket.on("user-disconnected", (id) => {
     delete markers[id];
   }
 });
-
 // ✅ Clear route and close all chatboxes when clicking anywhere else on the map
 map.on("click", (e) => {
   if (routeControl) {
@@ -333,59 +245,27 @@ socket.on("alert-notification", (data) => {
       `🚨 Help needed near you! User ${data.username} at (${data.latitude}, ${data.longitude})`
     );
   }
-  
-  // Highlight the alert sender's marker with pulsing red effect
+  // Highlight the alert sender's marker (by coordinates or username)
   for (const id in markers) {
     const marker = markers[id];
     const markerLatLng = marker.getLatLng();
-    
+    // If you have user ID, you can match by id === data.id
     if (
       (data.id && id === data.id) ||
       (Math.abs(markerLatLng.lat - data.latitude) < 0.0001 &&
         Math.abs(markerLatLng.lng - data.longitude) < 0.0001)
     ) {
-      // Create pulsing red alert icon
-      const alertIcon = new L.Icon({
-        iconUrl: `data:image/svg+xml;base64,${btoa(`
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40">
-            <defs>
-              <linearGradient id="alertGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#ff4757;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#ff3838;stop-opacity:1" />
-              </linearGradient>
-              <filter id="alertGlow">
-                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                <feMerge> 
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <circle cx="12" cy="12" r="10" fill="url(#alertGrad)" filter="url(#alertGlow)" stroke="white" stroke-width="2"/>
-            <text x="12" y="16" text-anchor="middle" fill="white" font-size="12" font-weight="bold">🚨</text>
-          </svg>
-        `)}`,
-        iconSize: [40, 40],
-        iconAnchor: [20, 40],
-        popupAnchor: [0, -40],
-        className: 'alert-marker-icon'
-      });
-      
       const originalIcon = marker.options.icon;
-      marker.setIcon(alertIcon);
-      
-      // Add pulsing animation
-      marker.getElement().style.animation = 'markerPulse 1s ease-in-out infinite';
-      
-      // Restore original icon after 10 seconds
+      const redIcon = new L.Icon({
+        iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
+      });
+      marker.setIcon(redIcon);
       setTimeout(() => {
-        if (originalIcon) {
-          marker.setIcon(originalIcon);
-          marker.getElement().style.animation = 'markerPulse 2s ease-in-out infinite';
-        }
+        if (originalIcon) marker.setIcon(originalIcon);
       }, 10000);
-      
-      break;
     }
   }
 });
@@ -439,7 +319,6 @@ function appendMessage(chatBox, sender, message) {
   chatBox.querySelector(".chat-messages").scrollTop =
     chatBox.querySelector(".chat-messages").scrollHeight;
 }
-
 const alertBtn = document.getElementById("alert-btn");
 if (alertBtn) {
   alertBtn.onclick = function () {
@@ -455,9 +334,7 @@ if (alertBtn) {
         longitude: myLatLng[1],
         username: username || "Unknown",
       });
-      
-      // Show success feedback with custom styling
-      showToast("🚨 Help alert sent to nearby users!");
+      alert("Help alert sent!");
     } else {
       alert("Waiting for your location...");
     }
