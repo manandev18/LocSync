@@ -197,13 +197,186 @@ body::before {
   border: 1px solid rgba(255, 107, 107, 0.2);
 }
 
-/* Map Container */
+/* ===== BEAUTIFUL MAP STYLING ===== */
 #map {
   width: 100vw;
   height: 100vh;
   border-radius: 0;
   position: relative;
   z-index: 1;
+  filter: contrast(1.1) saturate(1.2) brightness(0.9);
+  transition: var(--transition);
+}
+
+/* Map Container with Glow Effect */
+#map::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    rgba(102, 126, 234, 0.1) 0%, 
+    transparent 25%, 
+    transparent 75%, 
+    rgba(118, 75, 162, 0.1) 100%);
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: overlay;
+}
+
+/* Custom Dark Map Tiles */
+.leaflet-tile-pane {
+  filter: 
+    invert(1) 
+    hue-rotate(180deg) 
+    saturate(1.4) 
+    brightness(0.7) 
+    contrast(1.2);
+}
+
+/* Beautiful Custom Leaflet Controls */
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: var(--shadow-heavy) !important;
+}
+
+.leaflet-control-zoom a {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--border-radius-sm) !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  transition: var(--transition) !important;
+  box-shadow: var(--shadow-light) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3) !important;
+}
+
+.leaflet-control-zoom a:first-child {
+  border-bottom: 1px solid var(--border-color) !important;
+  border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0 !important;
+}
+
+.leaflet-control-zoom a:last-child {
+  border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm) !important;
+}
+
+/* Beautiful Attribution Control */
+.leaflet-control-attribution {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--border-radius-sm) !important;
+  color: var(--text-secondary) !important;
+  font-size: 0.75rem !important;
+  padding: 0.5rem 0.75rem !important;
+  box-shadow: var(--shadow-light) !important;
+}
+
+.leaflet-control-attribution a {
+  color: #667eea !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+}
+
+.leaflet-control-attribution a:hover {
+  color: #764ba2 !important;
+}
+
+/* Stunning Custom Popup Styling */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--border-radius) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-heavy) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  padding: 1.5rem !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  background: linear-gradient(135deg, 
+    rgba(102, 126, 234, 0.1) 0%, 
+    rgba(118, 75, 162, 0.1) 100%) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-glass) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-light) !important;
+}
+
+.leaflet-popup-close-button {
+  color: var(--text-primary) !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  padding: 0.5rem !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  transition: var(--transition) !important;
+  margin: 0.5rem !important;
+}
+
+.leaflet-popup-close-button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Custom Marker Shadows with Glow */
+.leaflet-marker-shadow {
+  filter: blur(3px) !important;
+  opacity: 0.4 !important;
+}
+
+/* Animated Marker Pulse Effect */
+@keyframes markerPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.leaflet-marker-icon {
+  animation: markerPulse 2s ease-in-out infinite !important;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) !important;
+  transition: var(--transition) !important;
+}
+
+.leaflet-marker-icon:hover {
+  transform: scale(1.15) !important;
+  filter: drop-shadow(0 8px 16px rgba(102, 126, 234, 0.4)) !important;
+  animation: none !important;
+}
+
+/* Beautiful Route Lines */
+.leaflet-routing-container .leaflet-routing-line {
+  stroke: #667eea !important;
+  stroke-width: 4 !important;
+  stroke-opacity: 0.8 !important;
+  filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3)) !important;
 }
 
 /* Control Buttons - REDUCED Z-INDEX */
@@ -413,31 +586,6 @@ body::before {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* Custom Leaflet Styles */
-.leaflet-popup-content-wrapper {
-  background: var(--bg-glass);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-sm);
-  color: var(--text-primary);
-}
-
-.leaflet-popup-tip {
-  background: var(--bg-glass);
-  border: 1px solid var(--border-color);
-}
-
-.leaflet-control-zoom a {
-  background: var(--bg-glass);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-}
-
-.leaflet-control-zoom a:hover {
-  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Leaflet Routing Machine Styles - REPOSITIONED TO LEFT SIDE */
