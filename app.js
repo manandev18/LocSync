@@ -63,6 +63,11 @@ io.on("connection", (socket) => {
         });
       }
     }
+    // Send push notification to all subscribers
+    sendPushToAll(
+      "🚨 Help needed near you!",
+      `User ${username} needs help at (${latitude}, ${longitude})`
+    );
   });
   socket.on("disconnect", () => {
     console.log("Client disconnected");
